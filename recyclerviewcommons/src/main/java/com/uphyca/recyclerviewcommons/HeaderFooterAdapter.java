@@ -34,52 +34,75 @@ public abstract class HeaderFooterAdapter<T, VH extends RecyclerView.ViewHolder>
 
     protected abstract void onBindItemViewHolder(VH holder, int position);
 
-    public static final int ITEM_VIEW_TYPE_ITEM = 0;
-    public static final int ITEM_VIEW_TYPE_HEADER = 1;
-    public static final int ITEM_VIEW_TYPE_FOOTER = 2;
-
-    @Nullable
-    private final View headerView;
-    @Nullable
-    private final View footerView;
-
-    private boolean showFooter;
-
-    public HeaderFooterAdapter(View headerView, View footerView) {
-        this(new ArrayList<T>(), headerView, footerView);
+    protected RecyclerView.ViewHolder onCreateHeaderViewHolder(ViewGroup parent) {
+        return null;
     }
 
-    public HeaderFooterAdapter(@NonNull List<T> objects, @Nullable View headerView, @Nullable View footerView) {
+    protected void onBindHeaderViewHolder(RecyclerView.ViewHolder holder, int position) {
+        // Empty
+    }
+
+    protected RecyclerView.ViewHolder onCreateFooterViewHolder(ViewGroup parent) {
+        return null;
+    }
+
+    protected void onBindFooterViewHolder(RecyclerView.ViewHolder holder, int position) {
+        // Empty
+    }
+
+    private static final int ITEM_VIEW_TYPE_ITEM = 0;
+    private static final int ITEM_VIEW_TYPE_HEADER = 1;
+    private static final int ITEM_VIEW_TYPE_FOOTER = 2;
+
+    private boolean hasHeader;
+    private boolean hasFooter;
+    private boolean showFooter;
+
+    public HeaderFooterAdapter(boolean hasHeader, boolean hasFooter) {
+        this(new ArrayList<T>(), hasHeader, hasFooter);
+    }
+
+    public HeaderFooterAdapter(@NonNull List<T> objects, boolean hasHeader, boolean hasFooter) {
         super(objects);
-        this.headerView = headerView;
-        this.footerView = footerView;
-        showFooter = footerView != null;
+        this.hasHeader = hasHeader;
+        this.hasFooter = hasFooter;
+        showFooter = this.hasFooter;
     }
 
     @Override
     public final RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case ITEM_VIEW_TYPE_HEADER:
-                return new HeaderFooterHolder(headerView);
-            case ITEM_VIEW_TYPE_FOOTER:
-                return new HeaderFooterHolder(footerView);
+                return onCreateHeaderViewHolder(parent);
             case ITEM_VIEW_TYPE_ITEM:
                 return onCreateItemViewHolder(parent);
+            case ITEM_VIEW_TYPE_FOOTER:
+                return onCreateFooterViewHolder(parent);
         }
         return null;
     }
 
     @Override
     public final void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (holder.getItemViewType() == ITEM_VIEW_TYPE_ITEM) {
-            //noinspection unchecked
-            onBindItemViewHolder((VH) holder, position);
+        switch (holder.getItemViewType()) {
+            case ITEM_VIEW_TYPE_HEADER:
+                onBindHeaderViewHolder(holder, position);
+                break;
+            case ITEM_VIEW_TYPE_ITEM:
+                onBindItemViewHolder((VH) holder, position);
+                break;
+            case ITEM_VIEW_TYPE_FOOTER:
+                onBindFooterViewHolder(holder, position);
+                break;
+            default:
+                // Should not happen
+                // TODO: Add an assert?
         }
     }
 
     public void showFooter() {
-        if (!showFooter) {
-            showFooter = footerView != null;
+        if (!showFooter && hasFooter) {
+            showFooter = true;
             notifyItemInserted(getHeadersCount() + getAdapterItemCount());
         }
     }
@@ -92,7 +115,7 @@ public abstract class HeaderFooterAdapter<T, VH extends RecyclerView.ViewHolder>
     }
 
     private int getHeadersCount() {
-        return headerView != null ? 1 : 0;
+        return hasHeader ? 1 : 0;
     }
 
     private int getFootersCount() {
@@ -126,7 +149,7 @@ public abstract class HeaderFooterAdapter<T, VH extends RecyclerView.ViewHolder>
         return getHeadersCount();
     }
 
-    private static class HeaderFooterHolder extends RecyclerView.ViewHolder {
+    public static class HeaderFooterHolder extends RecyclerView.ViewHolder {
 
         public HeaderFooterHolder(View itemView) {
             super(itemView);

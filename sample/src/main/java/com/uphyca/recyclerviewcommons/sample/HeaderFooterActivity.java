@@ -22,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -59,20 +60,30 @@ public class HeaderFooterActivity extends AppCompatActivity {
         }
 
         // set adapter
-        int height = (int) (100 * getResources().getDisplayMetrics().density);
-        TextView header = new TextView(this);
-        header.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
-        header.setGravity(Gravity.CENTER);
-        header.setText("header");
-        header.setBackgroundColor(Color.LTGRAY);
+        final SimpleHeaderFooterAdapter<String> adapter = new SimpleHeaderFooterAdapter<>(this, data, true, true);
+        adapter.setHeaderFooterViewCreator(new SimpleHeaderFooterAdapter.HeaderFooterViewCreator() {
+            @Override
+            public View createHeaderView() {
+                int height = (int) (100 * getResources().getDisplayMetrics().density);
+                TextView header = new TextView(HeaderFooterActivity.this);
+                header.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+                header.setGravity(Gravity.CENTER);
+                header.setText("header");
+                header.setBackgroundColor(Color.LTGRAY);
+                return header;
+            }
 
-        TextView footer = new TextView(this);
-        footer.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
-        footer.setGravity(Gravity.CENTER);
-        footer.setText("footer");
-        footer.setBackgroundColor(Color.LTGRAY);
-
-        final SimpleHeaderFooterAdapter<String> adapter = new SimpleHeaderFooterAdapter<>(this, data, header, footer);
+            @Override
+            public View createFooterView() {
+                int height = (int) (100 * getResources().getDisplayMetrics().density);
+                TextView footer = new TextView(HeaderFooterActivity.this);
+                footer.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+                footer.setGravity(Gravity.CENTER);
+                footer.setText("footer");
+                footer.setBackgroundColor(Color.LTGRAY);
+                return footer;
+            }
+        });
         recyclerView.setAdapter(adapter);
     }
 }

@@ -23,6 +23,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
@@ -70,18 +71,29 @@ public class PagingActivity extends AppCompatActivity {
         });
 
         // set adapter
-        int height = (int) (72 * getResources().getDisplayMetrics().density);
-        FrameLayout footer = new FrameLayout(this);
-        footer.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+        adapter = new SimpleHeaderFooterAdapter<>(this, new ArrayList<String>(), false, true);
+        adapter.setHeaderFooterViewCreator(new SimpleHeaderFooterAdapter.HeaderFooterViewCreator() {
+            @Override
+            public View createHeaderView() {
+                return null;
+            }
 
-        ProgressBar progressBar = new ProgressBar(this);
-        final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.gravity = Gravity.CENTER;
-        progressBar.setLayoutParams(params);
-        footer.addView(progressBar);
+            @Override
+            public View createFooterView() {
+                int height = (int) (72 * getResources().getDisplayMetrics().density);
+                FrameLayout footer = new FrameLayout(PagingActivity.this);
+                footer.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
 
-        adapter = new SimpleHeaderFooterAdapter<>(this, new ArrayList<String>(), null, footer);
+                ProgressBar progressBar = new ProgressBar(PagingActivity.this);
+                final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.gravity = Gravity.CENTER;
+                progressBar.setLayoutParams(params);
+                footer.addView(progressBar);
+
+                return footer;
+            }
+        });
         recyclerView.setAdapter(adapter);
 
         mockLoadData();

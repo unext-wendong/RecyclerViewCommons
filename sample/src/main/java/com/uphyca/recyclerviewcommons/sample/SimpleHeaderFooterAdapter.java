@@ -19,6 +19,8 @@ package com.uphyca.recyclerviewcommons.sample;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,11 +32,24 @@ import java.util.List;
 
 public class SimpleHeaderFooterAdapter<T> extends HeaderFooterAdapter<T, SimpleViewHolder> {
 
+    public interface HeaderFooterViewCreator {
+        View createHeaderView();
+
+        View createFooterView();
+    }
+
+    public void setHeaderFooterViewCreator(HeaderFooterViewCreator creator) {
+        viewCreator = creator;
+    }
+
+    @Nullable
+    private HeaderFooterViewCreator viewCreator;
+
     private final LayoutInflater inflater;
     private final int backgroundResId;
 
-    public SimpleHeaderFooterAdapter(@NonNull Context context, @NonNull List<T> data, View header, View footer) {
-        super(data, header, footer);
+    public SimpleHeaderFooterAdapter(@NonNull Context context, @NonNull List<T> data, boolean hasHeader, boolean hasFooter) {
+        super(data, hasHeader, hasFooter);
         this.inflater = LayoutInflater.from(context);
 
         TypedValue outValue = new TypedValue();
@@ -65,5 +80,31 @@ public class SimpleHeaderFooterAdapter<T> extends HeaderFooterAdapter<T, SimpleV
     protected void onBindItemViewHolder(SimpleViewHolder holder, int position) {
         T item = getItem(position);
         holder.textView.setText(item.toString());
+    }
+
+    @Override
+    protected RecyclerView.ViewHolder onCreateHeaderViewHolder(ViewGroup parent) {
+        View v = null;
+        if (viewCreator != null) {
+            v = viewCreator.createHeaderView();
+        }
+        if (v == null) {
+            return null;
+        }
+
+        return new HeaderFooterAdapter.HeaderFooterHolder(v);
+    }
+
+    @Override
+    protected RecyclerView.ViewHolder onCreateFooterViewHolder(ViewGroup parent) {
+        View v = null;
+        if (viewCreator != null) {
+            v = viewCreator.createFooterView();
+        }
+        if (v == null) {
+            return null;
+        }
+
+        return new HeaderFooterAdapter.HeaderFooterHolder(v);
     }
 }
